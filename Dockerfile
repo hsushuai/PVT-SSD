@@ -35,9 +35,9 @@ RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38
     && conda install -y python==3.7 \
     && conda clean -ya
 
-# Install PyTorch and dependencies
-RUN conda install -y -c pytorch pytorch==1.10.1 torchvision==0.11.2 cudatoolkit=11.1 \
-    && conda clean -ya
+# # Install PyTorch and dependencies
+# RUN conda install -y -c pytorch pytorch==1.10.1 torchvision==0.11.2 cudatoolkit=11.1 \
+#     && conda clean -ya
 
 # Set the default command to python3
 CMD ["python3"]
