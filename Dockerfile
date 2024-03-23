@@ -1,43 +1,24 @@
-FROM nvidia/cuda:11.1.1-devel-ubuntu18.04
+FROM nvcr.io/nvidia/pytorch:20.11-py3
 
-# Install basic utilities and dependencies
-# Install some basic utilities
-RUN apt-get update && apt-get install -y \
-    curl \
-    ca-certificates \
-    sudo \
-    git \
-    bzip2 \
-    libx11-6 \
-    && rm -rf /var/lib/apt/lists/*
+# Initialize mamba
+SHELL ["/bin/bash", "-c"]
 
-# Create a working directory
-RUN mkdir /app
-WORKDIR /app
+RUN rm -rf /opt/conda && apt-get update
+RUN wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" \
+    && bash Miniforge3.sh -b
+RUN echo "export PATH="/root/miniforge3/bin:$PATH"" >> ~/.bashrc && source ~/.bashrc
 
-# Create a non-root user and switch to it
-RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
-    && chown -R user:user /app
-RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-user
-USER user
+# Set up environment
+RUN apt-get install -y libgl1-mesa-glx
 
-# All users can use /home/user as their home directory
-ENV HOME=/home/user
-RUN chmod 777 /home/user
+# Install packages
+RUN /root/miniforge3/bin/mamba install -y pytorch==1.11.0 torchvision==0.12.0 cudatoolkit=11.1 -c pytorch -c conda-forge
+RUN /root/miniforge3/bin/mamba install -y -c fvcore -c iopath -c conda-forge fvcore iopath
+RUN /root/miniforge3/bin/mamba install -y pytorch3d -c pytorch3d
 
-# Install Miniconda and Python 3.7
-ENV CONDA_AUTO_UPDATE_CONDA=false
-ENV PATH=/home/user/miniconda/bin:$PATH
-RUN curl -sLo ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py38_4.8.3-Linux-x86_64.sh \
-    && chmod +x ~/miniconda.sh \
-    && ~/miniconda.sh -b -p ~/miniconda \
-    && rm ~/miniconda.sh \
-    && conda install -y python==3.7 \
-    && conda clean -ya
-
-# # Install PyTorch and dependencies
-# RUN conda install -y -c pytorch pytorch==1.10.1 torchvision==0.11.2 cudatoolkit=11.1 \
-#     && conda clean -ya
-
-# Set the default command to python3
-CMD ["python3"]
+RUN /root/miniforge3/bin/pip3 install numpy==1.19.5 protobuf==3.19.4 scikit-image==0.19.2 waymo-open-dataset-tf-2-2-0 \
+    nuscenes-devkit==1.0.5 einops==0.6.0 spconv-cu111 numba scipy pyyaml easydict fire tqdm shapely matplotlib \
+    opencv-python addict pyquaternion awscli open3d pandas future pybind11 tensorboardX tensorboard Cython
+RUN wget https://data.pyg.org/whl/torch-1.11.0%2Bcu113/torch_scatter-2.0.9-cp310-cp310-linux_x86_64.whl \
+    -O /tmp/torch_scatter-2.0.9-cp310-cp310-linux_x86_64.whl \
+    && /root/miniforge3/bin/pip3 install /tmp/torch_scatter-2.0.9-cp310-cp310-linux_x86_64.whl
