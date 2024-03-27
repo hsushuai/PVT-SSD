@@ -1,12 +1,12 @@
 [![arXiv](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2305.06621)
 [![GitHub Stars](https://img.shields.io/github/stars/Nightmare-n/PVT-SSD?style=social)](https://github.com/Nightmare-n/PVT-SSD)
-![visitors](https://visitor-badge.glitch.me/badge?page_id=Nightmare-n/PVT-SSD)
 
-# PVT-SSD: Single-Stage 3D Object Detector with Point-Voxel Transformer
+# PVT-SSD: Single-Stage 3D Object Detector with Point-Voxel Transformer in kitti
 
 
 ## Installation
-We test this project on NVIDIA A100 GPUs and Ubuntu 18.04.
+We test this project on a single NVIDIA V100 GPU and Ubuntu 22.04.
+
 ```
 conda create -n pvt-ssd python=3.7
 conda activate pvt-ssd
@@ -21,7 +21,37 @@ cd PVT-SSD && python setup.py develop --user
 
 ## Data Preparation
 
-Please follow the [instruction](https://github.com/open-mmlab/OpenPCDet/blob/master/docs/GETTING_STARTED.md) of OpenPCDet to prepare the dataset. For the Waymo dataset, we use the [evaluation toolkits](https://drive.google.com/drive/folders/1aa1kI9hhzBoZkIBcr8RBO3Zhg_RkOAag?usp=sharing) to evaluate detection results.
+### 1. Download raw kitti
+
+> We downloaded kitti from [OpenDataLab](https://opendatalab.com/OpenDataLab/KITTI_Object/tree/main) due to the special net in China.
+> If you have magic or base in other place, please download from [cvlibs](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d).
+
+Befor the 
+
+```bash
+openxlab dataset download --dataset-repo OpenDataLab/KITTI_Object --source-path /raw/data_object_calib.zip && \
+openxlab dataset download --dataset-repo OpenDataLab/KITTI_Object --source-path /raw/data_object_image_2.zip && \
+openxlab dataset download --dataset-repo OpenDataLab/KITTI_Object --source-path /raw/data_object_label_2.zip && \
+openxlab dataset download --dataset-repo OpenDataLab/KITTI_Object --source-path /raw/data_object_velodyne.zip && \
+cd OpenDataLab___KITTI_Object/raw && \
+unzip data_object_calib.zip && \
+rm data_object_calib.zip && \
+unzip data_object_image_2.zip && \
+rm data_object_image_2.zip && \
+unzip data_object_label_2.zip && \
+rm data_object_label_2.zip && \
+unzip data_object_velodyne.zip && \
+rm data_object_velodyne.zip && \
+mv training ../../data/kitti/ && \
+mv testing ../../data/kitti/ && \
+cd ../../ && \
+rm -r OpenDataLab___KITTI_Object
+```
+
+
+
+
+
 ```
 data
 │── waymo
@@ -78,10 +108,10 @@ data
 ## Training & Testing
 ```
 # train
-bash scripts/dist_train.sh
+bash tools/scripts/dist_train.sh
 
 # test
-bash scripts/dist_test.sh
+bash tools/scripts/dist_test.sh
 ```
 
 ## Results

@@ -14,7 +14,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 NGPUS=1
 
-EPOCH=epoch_80
+EPOCH=epoch_30
 
 CFG_NAME=kitti_models/pvt_ssd
 TAG_NAME=default
